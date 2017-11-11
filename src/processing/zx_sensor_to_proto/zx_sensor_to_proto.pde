@@ -9,6 +9,8 @@ int SENSOR_PORT_INDEX = 7; // /dev/tty.usbmodem1451, change to match port
 int SENSOR_PORT_NUMBER = 9600;
 
 int MAX_SPEED = 20;
+int MIN_SWIPE_DURATION = 6;
+int MAX_SWIPE_DURATION = 666;
 
 
 // vars
@@ -25,13 +27,17 @@ int speedIncrement = 1;
 
 String lastGestureId;
 String receivedGestureId;
-String gestureDirection;
+int gestureDirection;
 int gestureSpeed;
+int lowestSpeed = 1000;
+int highestSpeed = 0;
+int endMillis = -1;
 
 boolean isKeyPressed = false;
+boolean isSwiped = false;
 
 
-// processing setup
+// processing methods
 void setup() {
   size(128, 128);
   background(222, 211, 199);
@@ -42,15 +48,28 @@ void setup() {
 }
 
 void draw() {
-  parseGestureData();
-
   if (isKeyPressed) {
     increaseMotorSpeed();
+
   } else {
-    applyFriction();
+    if (isSwiped) {
+      // check if delay passed
+      if (millis() >= endMillis) {
+        isSwiped = false;
+      }
+
+    } else {
+      applyFriction();
+    }
   }
 
   sendMotorSpeed();
+}
+
+void serialEvent(Serial port) {
+  if (port == sensorPort) {
+    parseGestureData();
+  }
 }
 
 
@@ -84,6 +103,21 @@ void applyFriction() {
   }
 }
 
+int mapGestureDirection(String rawDirection) {
+  int direction;
+  switch (rawDirection) {
+    case "LEFT":
+      direction = -1;
+      break;
+    case "RIGHT":
+      direction = 1;
+      break;
+    default:
+     direction = 0;
+  }
+  return direction;
+}
+
 void increaseMotorSpeed() {
   currentMotorSpeed += speedIncrement * motorDirection;
 
@@ -99,7 +133,7 @@ void parseGestureData() {
   if (sensorPort == null) {
     return;
   }
-  
+
   if (sensorPort.available() > 0) {
     sensorPortData = sensorPort.readStringUntil(';');
   }
@@ -109,21 +143,31 @@ void parseGestureData() {
 
     String data[] = split(sensorPortData, ",");
     receivedGestureId = data[0];
-    
+
     if (receivedGestureId.equals(lastGestureId) == false) {
       lastGestureId = receivedGestureId;
-      gestureDirection = data[1];
+      gestureDirection = mapGestureDirection(data[1]);
       gestureSpeed = int(data[2]);
+
+      //printNewGesture();
       
-      println(
-        "New gesture! (id: " + lastGestureId +
-        ", direction: " + gestureDirection +
-        ", speed: " + gestureSpeed +
-      ")");
-      
+      motorDirection = gestureDirection;
+      lowestSpeed = max(lowestSpeed, gestureSpeed);
+      highestSpeed = max(highestSpeed, gestureSpeed);
+      setImpulse();
+
       sensorPortData = null;
     }
   }
+}
+
+void printNewGesture() {
+  println(
+    "New gesture! (id: " + lastGestureId +
+    ", direction: " + gestureDirection +
+    ", speed: " + gestureSpeed +
+    ")"
+  );
 }
 
 void sendMotorSpeed() {
@@ -131,8 +175,23 @@ void sendMotorSpeed() {
     return;
   }
 
-  println("sending speed: " + currentMotorSpeed);
+  //println("sending speed: " + currentMotorSpeed);
   protoPort.write(currentMotorSpeed);
+}
+
+void setImpulse() {
+  currentMotorSpeed = MAX_SPEED * motorDirection;
+
+  // TODO: make swipe duration dynamic
+  //int swipeDuration = int(map(
+  //  gestureSpeed,
+  //  highestSpeed, lowestSpeed,
+  //  MIN_SWIPE_DURATION, MAX_SWIPE_DURATION
+  //));  
+  //println("swipeDuration: " + swipeDuration);
+  
+  isSwiped = true;
+  endMillis = millis() + MAX_SWIPE_DURATION;
 }
 
 
