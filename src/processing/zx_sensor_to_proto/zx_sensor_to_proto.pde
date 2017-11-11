@@ -66,7 +66,7 @@ void initSensorPort() {
   sensorPortName = Serial.list()[SENSOR_PORT_INDEX];
   println("sensor port name: " + sensorPortName + ", index: " + SENSOR_PORT_INDEX);
 
-  protoPort = new Serial(this, sensorPortName, SENSOR_PORT_NUMBER);
+  sensorPort = new Serial(this, sensorPortName, SENSOR_PORT_NUMBER);
 }
 
 void applyFriction() {
