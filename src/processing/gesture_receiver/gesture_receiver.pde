@@ -1,3 +1,13 @@
+/****************************************************************
+
+GESTURE RECEIVER DEMO
+
+Program that receives gesture data from
+../../arduino/gesture-reader/gesture-reader.ino.
+
+****************************************************************/
+
+
 import processing.serial.*;
 
 
@@ -17,7 +27,7 @@ String gestureDirection;
 int gestureSpeed;
 
 
-// 
+// processing methods
 void setup() {
   initSensorPort();
 }
@@ -50,18 +60,19 @@ void parseGestureData() {
 
     String data[] = split(sensorPortData, ",");
     receivedGestureId = data[0];
-    
+
     if (receivedGestureId.equals(lastGestureId) == false) {
       lastGestureId = receivedGestureId;
       gestureDirection = data[1];
       gestureSpeed = int(data[2]);
-      
+
       println(
         "New gesture! (id: " + lastGestureId +
         ", direction: " + gestureDirection +
         ", speed: " + gestureSpeed +
-      ")");
-      
+        ")"
+      );
+
       sensorPortData = null;
     }
   }

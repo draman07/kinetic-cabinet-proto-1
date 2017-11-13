@@ -1,7 +1,14 @@
 /****************************************************************
-references:
-https://github.com/sparkfun/SparkFun_ZX_Distance_and_Gesture_Sensor_Arduino_Library
-https://learn.sparkfun.com/tutorials/zx-distance-and-gesture-sensor-hookup-guide
+
+GESTURE READER DEMO
+
+Program that reads the ZX sensor, and sends data to the Processing
+program at ../../processing/gesture-receiver/gesture-receiver.pde.
+
+References:
+- https://github.com/sparkfun/SparkFun_ZX_Distance_and_Gesture_Sensor_Arduino_Library
+- https://learn.sparkfun.com/tutorials/zx-distance-and-gesture-sensor-hookup-guide
+
 ****************************************************************/
 
 
