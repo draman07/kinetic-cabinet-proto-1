@@ -1,5 +1,7 @@
 # Kinetic Cabinet - Protoype (KC-P1)
 
+![](https://img.shields.io/badge/Academic%20Project%20%E2%80%94%20Advanced%20Electronic%20Arts%20Practices-inactive-lightgrey.svg)
+
 Sources for the Kinetic Cabinet protoype.
 
 ![image](documentation/fig-with-string-added.jpg)
